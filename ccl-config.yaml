@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/CatConfLang/ccl-test-data/main/ccl-config-schema.json
+
+# CCL Implementation Configuration
+# Declares capabilities for the C# CCL implementation.
+# Used by the test runner to filter tests to only those this implementation supports.
+
+# Required: Functions this implementation supports
+functions:
+  - parse
+  - parse_indented
+  - build_hierarchy
+  - print
+  - load
+  - canonical_format
+  - get_string
+  - get_int
+  - get_bool
+  - get_float
+  - get_list
+  - filter
+  - compose
+
+# Optional: Features this implementation supports
+features:
+  - comments
+  - empty_keys
+  - multiline
+  - multiline_continuation
+  - optional_typed_accessors
+  - unicode
+  - whitespace
+
+# Optional: Behavioral choices
+behaviors:
+  - boolean_lenient
+  - crlf_preserve_literal
+  - tabs_as_content
+  - delimiter_first_equals
+  - indent_spaces
+  - toplevel_indent_preserve
+  - array_order_insertion
+  - path_traversal
+  - list_coercion_enabled
+
+# Optional: Specification variant
+variants:
+  - proposed_behavior

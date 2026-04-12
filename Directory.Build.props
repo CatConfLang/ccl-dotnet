@@ -1,0 +1,24 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>Tyler Butler</Authors>
+    <Company>CatConfLang</Company>
+    <Copyright>Copyright © Tyler Butler</Copyright>
+    <PackageProjectUrl>https://github.com/CatConfLang/ccl-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CatConfLang/ccl-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Default to non-packable. Library projects opt in with <IsPackable>true</IsPackable>. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

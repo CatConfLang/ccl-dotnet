@@ -15,8 +15,18 @@ default:
 build:
     dotnet build
 
-test:
-    dotnet test
+# Run the CCL test suite via the pluggable Spectre.Console runner.
+# Extra args pass through to the runner (e.g. `just test --validation parse`).
+test *ARGS:
+    dotnet run --project test/CclDotnet.TestHost -- {{ARGS}}
+
+# Same as `test` but with verbose per-test output
+test-verbose *ARGS:
+    dotnet run --project test/CclDotnet.TestHost -- --verbose {{ARGS}}
+
+# Run only one validation type (parse, build_hierarchy, get_string, …)
+test-validation NAME *ARGS:
+    dotnet run --project test/CclDotnet.TestHost -- --validation {{NAME}} {{ARGS}}
 
 format:
     dotnet format
@@ -26,15 +36,11 @@ lint:
 
 clean:
     dotnet clean
-    rm -rf src/*/bin src/*/obj test/*/bin test/*/obj
+    rm -rf src/*/bin src/*/obj test/*/bin test/*/obj tools/*/bin tools/*/obj
 
 # Restore dependencies
 deps:
     dotnet restore
 
-ci: format lint test
+ci: format lint build test
 alias pr := ci
-
-# Run tests with verbose output
-test-verbose:
-    dotnet test --verbosity normal

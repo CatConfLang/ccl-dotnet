@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CatConfLang.TestRunner.Abstractions</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>CatConfLang.TestRunner.Abstractions</PackageId>
+    <Description>Abstractions for plugging a CCL (CatConfLang) implementation into the .NET CCL test runner. Defines ICclImplementation, ICclParser, ICclProcessing, and ICclTypedAccess.</Description>
+    <PackageTags>ccl;catconflang;test-runner;abstractions</PackageTags>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CclDotnet.TestHost</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CclDotnet\CclDotnet.csproj" />
+    <ProjectReference Include="..\..\tools\CatConfLang.TestRunner\CatConfLang.TestRunner.csproj" />
+  </ItemGroup>
+
+</Project>
