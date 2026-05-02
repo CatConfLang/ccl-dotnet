@@ -1,4 +1,0 @@
-project: testrunner
-kind: Added
-body: Initial release. Pluggable Spectre.Console-based runner that loads the shared ccl-test-data corpus, classifies tests against the implementation's config, executes them, and emits human-readable plus machine-readable (test-results-format v1.1.0) output.
-time: 2026-05-01T21:47:28.321401-07:00

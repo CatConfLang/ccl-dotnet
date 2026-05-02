@@ -1,4 +1,0 @@
-project: abstractions
-kind: Added
-body: Initial release. Defines ICclImplementation, ICclParser, ICclProcessing, and ICclTypedAccess for plugging a CCL implementation into the .NET test runner.
-time: 2026-05-01T21:47:28.279371-07:00
