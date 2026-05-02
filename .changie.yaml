@@ -9,6 +9,12 @@ envPrefix: CHANGIE
 projectsVersionSeparator: "-"
 
 projects:
+    - label: CclDotnet
+      key: ccldotnet
+      changelog: src/CclDotnet/CHANGELOG.md
+    - label: CclDotnet.Pacman
+      key: pacman
+      changelog: src/CclDotnet.Pacman/CHANGELOG.md
     - label: CatConfLang.TestRunner.Abstractions
       key: abstractions
       changelog: tools/CatConfLang.TestRunner.Abstractions/CHANGELOG.md

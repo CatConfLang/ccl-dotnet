@@ -53,10 +53,10 @@ deps:
 ci: format lint build test
 alias pr := ci
 
-# Create a new changelog entry for a project (abstractions | testrunner)
+# Create a new changelog entry for a project (ccldotnet | pacman | abstractions | testrunner)
 change PROJECT:
     changie new --projects {{PROJECT}}
 
-# Preview the next version changelog for a project (abstractions | testrunner)
+# Preview the next version changelog for a project (ccldotnet | pacman | abstractions | testrunner)
 changelog-preview PROJECT:
     changie batch auto --project {{PROJECT}} --dry-run
