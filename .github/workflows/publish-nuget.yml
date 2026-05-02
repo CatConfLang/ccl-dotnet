@@ -100,9 +100,7 @@ jobs:
         id: nuget-login
         with:
           # nuget.org profile name of the user who created the trust policy.
-          # Stored as a secret because nuget.org username isn't otherwise
-          # discoverable from the workflow context.
-          user: ${{ secrets.NUGET_USER }}
+          user: ${{ vars.NUGET_USER }}
 
       - name: Push
         env:
