@@ -5,128 +5,131 @@ open System.Collections.Generic
 open System.Globalization
 open System.Runtime.CompilerServices
 open System.Text
+open System.Text.RegularExpressions
 open CatConfLang.TestRunner.Abstractions
+open FParsec
 
 type private Model() =
     inherit Dictionary<string, Model>(StringComparer.Ordinal)
 
 module private Pacman =
     let private boundaryWhitespace = [| ' '; '\t'; '\n'; '\r' |]
+    let private indentedKeyLineBreak = Regex("[\r\n][ \t]+", RegexOptions.CultureInvariant)
+    let private keyUntilDelimiter: Parser<string, unit> = manyCharsTill anyChar (pchar '=')
 
-    let private trimKey (value: string) =
-        value.Trim(boundaryWhitespace)
+    let private normalizeLineEndings (value: string) = value.Replace("\r\n", "\n")
 
-    let private trimLeadingFirstLine (value: string) =
-        let mutable index = 0
-        while index < value.Length && (value[index] = ' ' || value[index] = '\t') do
-            index <- index + 1
-        value.Substring(index)
+    let private trimKey (value: string) = indentedKeyLineBreak.Replace(value.Trim(boundaryWhitespace), " ")
 
-    let private trimTrailingWhitespace (value: string) =
-        let mutable length = value.Length
-        while length > 0 && (value[length - 1] = ' ' || value[length - 1] = '\t' || value[length - 1] = '\n' || value[length - 1] = '\r') do
-            length <- length - 1
-        value.Substring(0, length)
+    let private isBlank = function | ' ' | '\t' | '\r' -> true | _ -> false
+    let private isIndent = function | ' ' | '\t' -> true | _ -> false
 
     let private trimValue (rawValue: string) =
         let firstNewline = rawValue.IndexOf('\n')
         let value =
             if firstNewline < 0 then
-                trimLeadingFirstLine rawValue
+                rawValue.TrimStart([| ' '; '\t' |])
             else
-                let firstLine = rawValue.Substring(0, firstNewline) |> trimLeadingFirstLine
+                let firstLine = rawValue.Substring(0, firstNewline).TrimStart([| ' '; '\t' |])
                 firstLine + rawValue.Substring(firstNewline)
 
-        trimTrailingWhitespace value
+        value.TrimEnd(boundaryWhitespace)
 
-    let private lineEnd (text: string) (start: int) =
-        let newline = text.IndexOf('\n', start)
-        if newline < 0 then text.Length else newline
+    let private lineEnd (text: string) (start: int) = match text.IndexOf('\n', start) with -1 -> text.Length | newline -> newline
 
-    let private isEmptyLine (text: string) (start: int) (finish: int) =
-        let mutable index = start
-        let mutable empty = true
-        while empty && index < finish do
-            let c = text[index]
-            empty <- c = ' ' || c = '\t' || c = '\r'
-            index <- index + 1
-        empty
+    let private isEmptyLine (text: string) (start: int) (finish: int) = text.Substring(start, finish - start) |> Seq.forall isBlank
 
-    let private countIndent (text: string) (start: int) =
-        let mutable index = start
-        let mutable count = 0
-        while index < text.Length && (text[index] = ' ' || text[index] = '\t') do
-            index <- index + 1
-            count <- count + 1
-        count
+    let private countIndent (text: string) (start: int) = text.Substring(start) |> Seq.takeWhile isIndent |> Seq.length
 
     let rec private skipEmptyLines (text: string) start =
         if start >= text.Length then
             text.Length
         else
             let finish = lineEnd text start
-            if isEmptyLine text start finish then
-                if finish < text.Length then skipEmptyLines text (finish + 1) else text.Length
-            else
+            if not (isEmptyLine text start finish) then
                 start
+            elif finish < text.Length then
+                skipEmptyLines text (finish + 1)
+            else
+                text.Length
 
-    let indentOfFirstContentLine (text: string) =
-        let start = skipEmptyLines text 0
-        if start >= text.Length then 0 else countIndent text start
+    let indentOfFirstContentLine (text: string) = let start = skipEmptyLines text 0 in if start >= text.Length then 0 else countIndent text start
 
-    let private findValueEnd (text: string) valueStart prefixLen =
-        let mutable scan = valueStart
-        let mutable valueEnd = text.Length
-        let mutable searching = true
-
-        while searching && scan < text.Length do
+    let private findValueEnd (text: string) (valueStart: int) (prefixLen: int) =
+        let rec loop (scan: int) =
             let newline = text.IndexOf('\n', scan)
-            if newline < 0 || newline + 1 >= text.Length then
-                searching <- false
+            if scan >= text.Length || newline < 0 || newline + 1 >= text.Length then
+                text.Length
             else
                 let nextLineStart = newline + 1
                 let nextLineEnd = lineEnd text nextLineStart
                 if isEmptyLine text nextLineStart nextLineEnd then
-                    scan <- nextLineStart
+                    loop nextLineStart
+                elif countIndent text nextLineStart <= prefixLen then
+                    nextLineStart
                 else
-                    let indent = countIndent text nextLineStart
-                    if indent <= prefixLen then
-                        valueEnd <- nextLineStart
-                        searching <- false
-                    else
-                        scan <- nextLineStart
+                    loop nextLineStart
 
-        valueEnd
+        loop valueStart
 
-    let parseWithPrefix (prefixLen: int) (input: string) =
+    let private parseKeyAt position (input: string) =
+        match run keyUntilDelimiter (input.Substring(position)) with
+        | Success(key, _, _) -> Some(key, position + key.Length + 1)
+        | Failure _ -> None
+
+    let parseWithPrefix (prefixLen: int) failOnTrailingContent (input: string) =
         let entries = ResizeArray<Entry>()
-        let mutable position = skipEmptyLines input 0
-
-        while position < input.Length do
-            let delimiter = input.IndexOf('=', position)
-            if delimiter < 0 then
-                position <- input.Length
+        let rec loop position =
+            let position = skipEmptyLines input position
+            if position >= input.Length then
+                true
             else
-                let key = input.Substring(position, delimiter - position) |> trimKey
-                let valueStart = delimiter + 1
-                let valueEnd = findValueEnd input valueStart prefixLen
-                let value = input.Substring(valueStart, valueEnd - valueStart) |> trimValue
-                entries.Add(Entry(key, value))
-                position <- skipEmptyLines input valueEnd
+                match parseKeyAt position input with
+                | Some(rawKey, valueStart) ->
+                    let key = rawKey |> trimKey
+                    let valueEnd = findValueEnd input valueStart prefixLen
+                    let value = input.Substring(valueStart, valueEnd - valueStart) |> trimValue
+                    entries.Add(Entry(key, value))
+                    loop valueEnd
+                | None -> not failOnTrailingContent
 
-        entries :> IReadOnlyList<Entry>
+        if loop 0 then
+            entries :> IReadOnlyList<Entry>
+        else
+            Array.Empty<Entry>() :> IReadOnlyList<Entry>
+
+    let private splitRepeatedMultilineKeys (entries: IReadOnlyList<Entry>) =
+        let splitEntries = ResizeArray<Entry>()
+        let seenKeys = HashSet<string>(StringComparer.Ordinal)
+        let add (entry: Entry) =
+            splitEntries.Add(entry)
+            seenKeys.Add(entry.Key) |> ignore
+
+        for entry in entries do
+            let newline = entry.Key.LastIndexOf('\n')
+            if newline > 0 && newline + 1 < entry.Key.Length then
+                let prefix = entry.Key.Substring(0, newline) |> trimKey
+                let suffix = entry.Key.Substring(newline + 1) |> trimKey
+                if prefix.Length > 0 && seenKeys.Contains(suffix) then
+                    add (Entry(prefix, ""))
+                    add (Entry(suffix, entry.Value))
+                else
+                    add entry
+            else
+                add entry
+
+        splitEntries :> IReadOnlyList<Entry>
 
     let parse input =
-        if String.IsNullOrEmpty input then
-            Array.Empty<Entry>() :> IReadOnlyList<Entry>
-        else
-            parseWithPrefix 0 input
+        if String.IsNullOrEmpty input then Array.Empty<Entry>() :> IReadOnlyList<Entry>
+        else input |> normalizeLineEndings |> parseWithPrefix 0 false |> splitRepeatedMultilineKeys
 
     let parseIndented input =
-        if String.IsNullOrEmpty input then
-            Array.Empty<Entry>() :> IReadOnlyList<Entry>
+        if String.IsNullOrEmpty input then Array.Empty<Entry>() :> IReadOnlyList<Entry>
         else
-            parseWithPrefix (indentOfFirstContentLine input) input
+            let normalized = normalizeLineEndings input
+            let prefixLen = indentOfFirstContentLine normalized
+            parseWithPrefix prefixLen true normalized |> splitRepeatedMultilineKeys
 
     let private mergeModel (target: Model) (source: Model) =
         let rec mergeInto (target: Model) (source: Model) =
@@ -136,10 +139,17 @@ module private Pacman =
                 | false, _ -> target[key] <- value
         mergeInto target source
 
+    let private valueLooksNestedCcl (value: string) =
+        let firstNewline = value.IndexOf('\n')
+
+        firstNewline >= 0
+        && value.Contains("=", StringComparison.Ordinal)
+        && value.Substring(0, firstNewline).Trim(boundaryWhitespace).Length = 0
+
     let rec private modelFromValue (value: string) =
-        if value.Contains("=", StringComparison.Ordinal) then
+        if valueLooksNestedCcl value then
             value
-            |> parseWithPrefix (indentOfFirstContentLine value)
+            |> parseIndented
             |> modelFromEntries
         else
             let model = Model()
