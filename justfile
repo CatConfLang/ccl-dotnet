@@ -15,14 +15,14 @@ default:
 build:
     dotnet build
 
-# Run the CCL test suite via the pluggable Spectre.Console runner.
+# Run the CCL test suite via the pluggable Spectre.Console runner for all implementations.
 # Extra args pass through to the runner (e.g. `just test --validation parse`).
 test *ARGS:
-    dotnet run --project test/CclDotnet.TestHost -- {{ARGS}}
+    status=0; dotnet run --project test/CclDotnet.TestHost -- {{ARGS}} || status=$?; dotnet run --project test/CclDotnet.Pacman.TestHost -- {{ARGS}} || status=$?; exit $status
 
 # Same as `test` but with verbose per-test output
 test-verbose *ARGS:
-    dotnet run --project test/CclDotnet.TestHost -- --verbose {{ARGS}}
+    status=0; dotnet run --project test/CclDotnet.TestHost -- --verbose {{ARGS}} || status=$?; dotnet run --project test/CclDotnet.Pacman.TestHost -- --verbose {{ARGS}} || status=$?; exit $status
 
 # Run only one validation type (parse, build_hierarchy, get_string, …)
 test-validation NAME *ARGS:

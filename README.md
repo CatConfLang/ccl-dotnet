@@ -23,7 +23,7 @@ A .NET implementation of CCL (Categorical Configuration Language).
 
 ```bash
 just build                    # dotnet build
-just test                     # run the full CCL test suite
+just test                     # run the full CCL test suite for all impls
 just test --pretty            # force coloured output
 just test --validation parse  # run only one validation type
 just test --filter foo        # run tests whose name contains "foo"
@@ -35,5 +35,5 @@ just lint                     # dotnet format --verify-no-changes
 just ci                       # format, lint, build, test
 ```
 
-`just test` runs the test runner host, not `dotnet test`. See the runner
+`just test` runs the test runner hosts, not `dotnet test`. See the runner
 README for the full CLI surface.
