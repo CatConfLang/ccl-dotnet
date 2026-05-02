@@ -26,6 +26,19 @@ public class CclParser : ICclParser
     return BuildHierarchyFromEntries(entries);
   }
 
+  /// <summary>
+  /// Canonical OCaml-reference model construction. Produces a recursive
+  /// Map&lt;string, Model&gt; where every value is itself a key into an inner map
+  /// (no scalar leaves), with duplicate keys merged recursively.
+  /// Not yet implemented in this projection-based parser.
+  /// </summary>
+  public object BuildModel(string input)
+  {
+    throw new NotImplementedException(
+        "build_model is not yet implemented in ccl-dotnet. " +
+        "See https://catconflang.com/reference/functions/#build_model");
+  }
+
   public object Load(string input)
   {
     return BuildHierarchy(input);

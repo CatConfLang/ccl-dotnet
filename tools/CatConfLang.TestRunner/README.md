@@ -49,6 +49,7 @@ public class MyParser : ICclParser
     public IReadOnlyList<Entry> Parse(string input) { /* ... */ }
     public IReadOnlyList<Entry> ParseIndented(string input) { /* ... */ }
     public object BuildHierarchy(string input) { /* ... */ }
+    public object BuildModel(string input) { /* ... */ }
     public object Load(string input) { /* ... */ }
     public string Print(string input) { /* ... */ }
     public string CanonicalFormat(string input) { /* ... */ }
@@ -183,7 +184,7 @@ If none of these resolve, the runner exits with code 2 and a clear message.
 <impl-host> [options]
   --test-data <path>     Override test data location
   --validation <name>    Run only tests with this validation type
-                         (parse, build_hierarchy, get_string, …)
+                         (parse, build_hierarchy, build_model, get_string, …)
   --filter <substring>   Run only tests whose name contains <substring>
   --verbose, -v          Show every test outcome (not just failures)
   --pretty | --plain     Force reporter (auto-detected by TTY otherwise)

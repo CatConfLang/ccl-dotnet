@@ -1,0 +1,3 @@
+project: testrunner
+kind: Added
+body: "Dispatch the `build_model` validation type. Tests with `function: build_model` now invoke `ICclParser.BuildModel` and assert against the expected object shape, mirroring `build_hierarchy` handling."
