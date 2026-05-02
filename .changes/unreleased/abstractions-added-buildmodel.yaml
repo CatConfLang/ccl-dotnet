@@ -1,3 +1,0 @@
-project: abstractions
-kind: Added
-body: Add `ICclParser.BuildModel(string)` for the canonical CCL data model — the recursive `Map<string, Model>` shape (no scalar leaves, duplicate keys merge). Peer to `BuildHierarchy`. See https://catconflang.com/reference/functions/#build_model.
