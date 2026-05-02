@@ -28,6 +28,14 @@ test-verbose *ARGS:
 test-validation NAME *ARGS:
     dotnet run --project test/CclDotnet.TestHost -- --validation {{NAME}} {{ARGS}}
 
+# Run the CCL test suite against the F# Pacman implementation.
+test-pacman *ARGS:
+    dotnet run --project test/CclDotnet.Pacman.TestHost -- {{ARGS}}
+
+# Run one validation type against the F# Pacman implementation.
+test-pacman-validation NAME *ARGS:
+    dotnet run --project test/CclDotnet.Pacman.TestHost -- --validation {{NAME}} {{ARGS}}
+
 format:
     dotnet format
 

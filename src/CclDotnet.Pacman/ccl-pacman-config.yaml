@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/CatConfLang/ccl-test-data/main/ccl-config-schema.json
+
+functions:
+  - parse
+  - parse_indented
+  - build_model
+
+features:
+  - comments
+  - empty_keys
+  - multiline
+  - multiline_continuation
+  - optional_typed_accessors
+  - unicode
+  - whitespace
+
+behaviors:
+  - boolean_strict
+  - crlf_normalize_to_lf
+  - continuation_tab_preserve
+  - delimiter_first_equals
+  - indent_spaces
+  - toplevel_indent_strip
+  - array_order_insertion
+  - path_traversal
+  - list_coercion_enabled
+
+variants:
+  - reference_compliant
