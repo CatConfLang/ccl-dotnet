@@ -21,7 +21,7 @@ jobs:
         with:
           base-sha: ${{ github.event.pull_request.base.sha }}
           head-sha: ${{ github.event.pull_request.head.sha }}
-          projects: 'abstractions,testrunner'
+          projects: 'ccldotnet,pacman,abstractions,testrunner'
 
       - name: Comment with changelog preview
         if: steps.changelog.outputs.has-entries == 'true'

@@ -4,9 +4,13 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <PackageId>CatConfLang.CclDotnet</PackageId>
+    <Description>.NET implementation of CatConfLang CCL backed by the F# Pacman parser core.</Description>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CclDotnet.Pacman\CclDotnet.Pacman.fsproj" />
     <ProjectReference Include="..\..\tools\CatConfLang.TestRunner.Abstractions\CatConfLang.TestRunner.Abstractions.csproj" />
   </ItemGroup>
 

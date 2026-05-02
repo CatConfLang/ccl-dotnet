@@ -28,6 +28,14 @@ test-verbose *ARGS:
 test-validation NAME *ARGS:
     dotnet run --project test/CclDotnet.TestHost -- --validation {{NAME}} {{ARGS}}
 
+# Run the CCL test suite against the F# Pacman implementation.
+test-pacman *ARGS:
+    dotnet run --project test/CclDotnet.Pacman.TestHost -- {{ARGS}}
+
+# Run one validation type against the F# Pacman implementation.
+test-pacman-validation NAME *ARGS:
+    dotnet run --project test/CclDotnet.Pacman.TestHost -- --validation {{NAME}} {{ARGS}}
+
 format:
     dotnet format
 
@@ -45,10 +53,10 @@ deps:
 ci: format lint build test
 alias pr := ci
 
-# Create a new changelog entry for a project (abstractions | testrunner)
+# Create a new changelog entry for a project (ccldotnet | pacman | abstractions | testrunner)
 change PROJECT:
     changie new --projects {{PROJECT}}
 
-# Preview the next version changelog for a project (abstractions | testrunner)
+# Preview the next version changelog for a project (ccldotnet | pacman | abstractions | testrunner)
 changelog-preview PROJECT:
     changie batch auto --project {{PROJECT}} --dry-run

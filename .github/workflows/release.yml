@@ -28,7 +28,7 @@ jobs:
         id: release
         with:
           token: ${{ steps.app-token.outputs.token }}
-          projects: 'abstractions,testrunner'
+          projects: 'ccldotnet,pacman,abstractions,testrunner'
 
       - name: Summary
         if: steps.release.outputs.skipped != 'true'

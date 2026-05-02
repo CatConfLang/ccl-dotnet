@@ -17,12 +17,15 @@ name: Publish to NuGet
 #   4. Create the GitHub environment "nuget-publish" with required reviewers.
 #
 # Triggered by changie auto-tag pushing per-project tags like
-# `abstractions-v1.0.0` or `testrunner-v1.0.0`, or via manual dispatch.
+# `ccldotnet-v1.0.0`, `pacman-v1.0.0`, `abstractions-v1.0.0`, or
+# `testrunner-v1.0.0`, or via manual dispatch.
 
 on:
   push:
     tags:
       - 'abstractions-v*'
+      - 'ccldotnet-v*'
+      - 'pacman-v*'
       - 'testrunner-v*'
   workflow_dispatch:
     inputs:
@@ -32,6 +35,8 @@ on:
         type: choice
         options:
           - abstractions
+          - ccldotnet
+          - pacman
           - testrunner
       version:
         description: 'Version to publish (e.g. 1.0.0)'
@@ -70,6 +75,8 @@ jobs:
 
           # Validate project key against the known set.
           case "$project" in
+            ccldotnet)    csproj="src/CclDotnet/CclDotnet.csproj" ;;
+            pacman)       csproj="src/CclDotnet.Pacman/CclDotnet.Pacman.fsproj" ;;
             abstractions) csproj="tools/CatConfLang.TestRunner.Abstractions/CatConfLang.TestRunner.Abstractions.csproj" ;;
             testrunner)   csproj="tools/CatConfLang.TestRunner/CatConfLang.TestRunner.csproj" ;;
             *)

@@ -1,0 +1,4 @@
+project: ccldotnet
+kind: Added
+body: Publish the CclDotnet implementation package with Pacman-backed parser core, canonical formatting, and scalar-to-list coercion disabled.
+time: 2026-05-02T13:01:58.923883-07:00
