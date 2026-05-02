@@ -1,4 +1,5 @@
 using CatConfLang.TestRunner.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace CclDotnet;
 
@@ -20,7 +21,7 @@ public class CclProcessor : ICclProcessing
     {
       if (!string.IsNullOrEmpty(input))
       {
-        result.AddRange(parser.Parse(input));
+        result.AddRange(parser.Parse(NormalizeComposedEmptyKeys(input)));
       }
     }
     return result;
@@ -44,5 +45,10 @@ public class CclProcessor : ICclProcessing
       "contains" => fieldValue.Contains(value, StringComparison.Ordinal),
       _ => throw new CclParseException($"Unknown filter operator: {op}")
     };
+  }
+
+  private static string NormalizeComposedEmptyKeys(string input)
+  {
+    return Regex.Replace(input, "(?m)^[ \t]+=", "=");
   }
 }

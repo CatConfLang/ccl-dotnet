@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CclDotnet.Pacman\CclDotnet.Pacman.fsproj" />
     <ProjectReference Include="..\..\tools\CatConfLang.TestRunner.Abstractions\CatConfLang.TestRunner.Abstractions.csproj" />
   </ItemGroup>
 

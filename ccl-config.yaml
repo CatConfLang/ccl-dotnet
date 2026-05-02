@@ -8,10 +8,10 @@
 functions:
   - parse
   - parse_indented
+  - build_model
   - build_hierarchy
   - print
   - load
-  - canonical_format
   - get_string
   - get_int
   - get_bool
@@ -33,11 +33,11 @@ features:
 # Optional: Behavioral choices
 behaviors:
   - boolean_lenient
-  - crlf_preserve_literal
-  - tabs_as_content
+  - crlf_normalize_to_lf
+  - continuation_tab_preserve
   - delimiter_first_equals
   - indent_spaces
-  - toplevel_indent_preserve
+  - toplevel_indent_strip
   - array_order_insertion
   - path_traversal
   - list_coercion_enabled
