@@ -1,4 +1,0 @@
-project: pacman
-kind: Added
-body: Add the F# Pacman parser implementation with parse, parse_indented, build_model, print, and canonical_format support.
-time: 2026-05-02T13:01:58.911103-07:00
