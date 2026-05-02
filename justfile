@@ -44,3 +44,11 @@ deps:
 
 ci: format lint build test
 alias pr := ci
+
+# Create a new changelog entry for a project (abstractions | testrunner)
+change PROJECT:
+    changie new --projects {{PROJECT}}
+
+# Preview the next version changelog for a project (abstractions | testrunner)
+changelog-preview PROJECT:
+    changie batch auto --project {{PROJECT}} --dry-run

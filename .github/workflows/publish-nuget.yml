@@ -16,17 +16,26 @@ name: Publish to NuGet
 #        - Package pattern:  CatConfLang.*
 #   4. Create the GitHub environment "nuget-publish" with required reviewers.
 #
-# Triggered by pushing a tag like `v1.0.0` or via manual dispatch.
+# Triggered by changie auto-tag pushing per-project tags like
+# `abstractions-v1.0.0` or `testrunner-v1.0.0`, or via manual dispatch.
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'abstractions-v*'
+      - 'testrunner-v*'
   workflow_dispatch:
     inputs:
+      project:
+        description: 'Project to publish'
+        required: true
+        type: choice
+        options:
+          - abstractions
+          - testrunner
       version:
-        description: 'Version to publish (e.g. 1.0.0). Leave blank to use tag.'
-        required: false
+        description: 'Version to publish (e.g. 1.0.0)'
+        required: true
 
 permissions:
   id-token: write   # required for OIDC exchange with nuget.org
@@ -37,35 +46,54 @@ jobs:
     runs-on: ubuntu-latest
     environment: nuget-publish
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
 
-      - name: Resolve version
-        id: ver
+      - name: Resolve project and version
+        id: resolve
         env:
+          INPUT_PROJECT: ${{ inputs.project }}
           INPUT_VERSION: ${{ inputs.version }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ -n "$INPUT_VERSION" ]; then
-            value="$INPUT_VERSION"
+          if [ -n "$INPUT_PROJECT" ] && [ -n "$INPUT_VERSION" ]; then
+            project="$INPUT_PROJECT"
+            version="$INPUT_VERSION"
           else
-            value="${REF_NAME#v}"
+            # Tag format: <project>-v<version>, e.g. abstractions-v1.0.0
+            project="${REF_NAME%%-v*}"
+            version="${REF_NAME#${project}-v}"
           fi
+
+          # Validate project key against the known set.
+          case "$project" in
+            abstractions) csproj="tools/CatConfLang.TestRunner.Abstractions/CatConfLang.TestRunner.Abstractions.csproj" ;;
+            testrunner)   csproj="tools/CatConfLang.TestRunner/CatConfLang.TestRunner.csproj" ;;
+            *)
+              echo "Refusing to publish: unknown project '$project'." >&2
+              exit 1
+              ;;
+          esac
+
           # Reject anything that isn't a plain SemVer-ish string. Defends
           # against shell-meta or arg injection through dispatch input / tag.
-          if ! printf '%s' "$value" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'; then
-            echo "Refusing to publish: '$value' is not a valid version string." >&2
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'; then
+            echo "Refusing to publish: '$version' is not a valid version string." >&2
             exit 1
           fi
-          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+          echo "project=$project" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "csproj=$csproj"   >> "$GITHUB_OUTPUT"
 
       - name: Pack
         env:
-          VERSION: ${{ steps.ver.outputs.value }}
-        run: dotnet pack -c Release -p:Version="$VERSION" -o ./artifacts
+          VERSION: ${{ steps.resolve.outputs.version }}
+          CSPROJ: ${{ steps.resolve.outputs.csproj }}
+        run: dotnet pack "$CSPROJ" -c Release -p:Version="$VERSION" -o ./artifacts
 
       - name: Login to NuGet (trusted publishing)
         uses: nuget/login@v1
