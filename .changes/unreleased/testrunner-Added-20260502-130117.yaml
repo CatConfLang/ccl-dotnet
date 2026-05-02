@@ -1,0 +1,4 @@
+project: testrunner
+kind: Added
+body: Dispatch and assert `canonical_format` validations through `ICclParser.CanonicalFormat`.
+time: 2026-05-02T13:01:17.506699-07:00

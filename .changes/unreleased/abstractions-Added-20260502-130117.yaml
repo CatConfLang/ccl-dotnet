@@ -1,0 +1,4 @@
+project: abstractions
+kind: Added
+body: Add `ICclParser.CanonicalFormat(string)` for canonical CCL text output.
+time: 2026-05-02T13:01:17.484557-07:00
