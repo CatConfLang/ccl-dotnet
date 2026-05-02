@@ -46,7 +46,7 @@ public class CclParser : ICclParser
 
   public string CanonicalFormat(string input)
   {
-    return FormatModel(AsModel(BuildModel(input)), 0);
+    return _core.CanonicalFormat(input);
   }
 
   private static IDictionary<string, object> AsModel(object value)

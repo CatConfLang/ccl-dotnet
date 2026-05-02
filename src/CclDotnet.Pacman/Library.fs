@@ -225,61 +225,80 @@ module private Pacman =
             appendEntry builder entry
         builder.ToString()
 
-    let private sortedKeys (dictionary: Dictionary<string, obj>) =
-        dictionary.Keys
+    let private sortedModelKeys (model: Model) =
+        model.Keys
         |> Seq.sortWith (fun left right ->
             match left = "", right = "" with
             | true, false -> -1
             | false, true -> 1
             | _ -> StringComparer.Ordinal.Compare(left, right))
 
-    let rec private formatValue (builder: StringBuilder) (depth: int) (key: string) (value: obj) =
-        let indent = String(' ', depth * 2)
-        match value with
-        | :? Dictionary<string, obj> as nested ->
-            builder.Append(indent).Append(key).Append(" =\n") |> ignore
-            formatDictionary builder (depth + 1) nested
-        | :? List<obj> as items ->
-            for item in items do
-                match item with
-                | :? Dictionary<string, obj> as nested ->
-                    builder.Append(indent).Append(key).Append(" =\n") |> ignore
-                    formatDictionary builder (depth + 1) nested
-                | _ ->
-                    builder.Append(indent).Append(key).Append(" = ").Append(item).Append('\n') |> ignore
-        | _ ->
-            builder.Append(indent).Append(key).Append(" = ").Append(value).Append('\n') |> ignore
+    let private entryValueContainsEmptyKey (value: string) =
+        valueLooksNestedCcl value
+        && (value |> parseIndented |> Seq.exists (fun (entry: Entry) -> entry.Key = ""))
 
-    and private formatDictionary (builder: StringBuilder) depth (dictionary: Dictionary<string, obj>) =
-        for key in sortedKeys dictionary do
-            if key = "" then
-                match dictionary[key] with
-                | :? List<obj> as items ->
-                    for item in items do
-                        let indent = String(' ', depth * 2)
-                        match item with
-                        | :? Dictionary<string, obj> as nested ->
-                            builder.Append(indent).Append("=\n") |> ignore
-                            formatDictionary builder (depth + 1) nested
-                        | _ ->
-                            builder.Append(indent).Append("= ").Append(item).Append('\n') |> ignore
-                | value ->
-                    let indent = String(' ', depth * 2)
-                    match value with
-                    | :? Dictionary<string, obj> as nested ->
-                        builder.Append(indent).Append("=\n") |> ignore
-                        formatDictionary builder (depth + 1) nested
-                    | _ ->
-                        builder.Append(indent).Append("= ").Append(value).Append('\n') |> ignore
+    let private shouldUseHierarchyFormat (input: string) (entries: IReadOnlyList<Entry>) =
+        (entries.Count = 1 && input.Contains('\t'))
+        || indentOfFirstContentLine input > 0
+        || Seq.exists (fun (entry: Entry) -> entry.Key = "" || entryValueContainsEmptyKey entry.Value) entries
+
+    let private containsOnlyEmptyLeaf (model: Model) =
+        model.Count = 1
+        && model.ContainsKey("")
+        && isEmptyModel model[""]
+
+    let rec private formatModel (builder: StringBuilder) depth (model: Model) =
+        for key in sortedModelKeys model do
+            let child = model[key]
+            builder.Append(String(' ', depth * 2)).Append(if key = "" then "=" else key + " =").Append('\n') |> ignore
+            if not (isEmptyModel child || containsOnlyEmptyLeaf child) then
+                formatModel builder (depth + 1) child
+
+    let rec private formatHierarchyNode (builder: StringBuilder) depth (key: string) (model: Model) =
+        let indent = String(' ', depth * 2)
+
+        if isEmptyModel model || containsOnlyEmptyLeaf model then
+            builder.Append(indent).Append(key).Append(" =").Append('\n') |> ignore
+        elif allChildrenAreLeaves model then
+            for value in model.Keys do
+                builder.Append(indent).Append(key).Append(" = ").Append(value).Append('\n') |> ignore
+        else
+            builder.Append(indent).Append(key).Append(" =\n") |> ignore
+            formatHierarchy builder (depth + 1) model
+
+    and private formatBareList (builder: StringBuilder) depth (model: Model) =
+        let indent = String(' ', depth * 2)
+        for key in model.Keys do
+            let child = model[key]
+            if isEmptyModel child || containsOnlyEmptyLeaf child then
+                builder.Append(indent).Append("= ").Append(key).Append('\n') |> ignore
             else
-                formatValue builder depth key dictionary[key]
+                builder.Append(indent).Append("=\n") |> ignore
+                formatHierarchy builder (depth + 1) child
+
+    and private formatHierarchy (builder: StringBuilder) depth (model: Model) =
+        for key in sortedModelKeys model do
+            let child = model[key]
+            if key = "" then
+                formatBareList builder depth child
+            else
+                formatHierarchyNode builder depth key child
 
     let canonicalFormat input =
+        let normalized = normalizeLineEndings input
+        let entries =
+            if indentOfFirstContentLine normalized > 0 then
+                parseIndented normalized
+            else
+                parse normalized
+        let model = modelFromEntries entries
         let builder = StringBuilder()
-        match buildHierarchy input with
-        | :? Dictionary<string, obj> as hierarchy -> formatDictionary builder 0 hierarchy
-        | _ -> ()
-        builder.ToString().TrimEnd('\n')
+        if shouldUseHierarchyFormat normalized entries then
+            formatHierarchy builder 0 model
+            builder.ToString().TrimEnd('\n')
+        else
+            formatModel builder 0 model
+            builder.ToString()
 
 type CclPacmanParser() =
     interface ICclParser with

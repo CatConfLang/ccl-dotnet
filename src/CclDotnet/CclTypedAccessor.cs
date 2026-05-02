@@ -6,7 +6,7 @@ namespace CclDotnet;
 /// Typed accessor implementation for CCL hierarchies.
 /// Supports path navigation using segment arrays and type conversions.
 /// Uses boolean_lenient: accepts true/false/yes/no/on/off/1/0 (case-insensitive).
-/// Uses list_coercion_enabled: single values and empty-key dicts are coerced to lists.
+/// Uses list_coercion_disabled: only list values are returned as lists.
 /// </summary>
 public class CclTypedAccessor : ICclTypedAccess
 {
@@ -62,10 +62,6 @@ public class CclTypedAccessor : ICclTypedAccess
     if (value is Dictionary<string, object> dict &&
         dict.TryGetValue("", out var inner) && inner is List<object> bareList)
       return bareList;
-
-    // list_coercion_enabled: single scalar value → single-item list
-    if (value is string s)
-      return new List<object> { s };
 
     throw new CclParseException($"Value at path is not a list.");
   }

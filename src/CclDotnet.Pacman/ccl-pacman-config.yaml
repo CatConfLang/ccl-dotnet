@@ -4,6 +4,8 @@ functions:
   - parse
   - parse_indented
   - build_model
+  - print
+  - canonical_format
 
 features:
   - comments

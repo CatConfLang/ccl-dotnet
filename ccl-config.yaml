@@ -12,6 +12,7 @@ functions:
   - build_hierarchy
   - print
   - load
+  - canonical_format
   - get_string
   - get_int
   - get_bool
@@ -40,8 +41,8 @@ behaviors:
   - toplevel_indent_strip
   - array_order_insertion
   - path_traversal
-  - list_coercion_enabled
+  - list_coercion_disabled
 
 # Optional: Specification variant
 variants:
-  - proposed_behavior
+  - reference_compliant
