@@ -99,7 +99,10 @@ jobs:
         uses: nuget/login@8d196754b4036150537f80ac539e15c2f1028841 # ratchet:nuget/login@v1
         id: nuget-login
         with:
-          user: NuGetTrustedPublisher
+          # nuget.org profile name of the user who created the trust policy.
+          # Stored as a secret because nuget.org username isn't otherwise
+          # discoverable from the workflow context.
+          user: ${{ secrets.NUGET_USER }}
 
       - name: Push
         env:
