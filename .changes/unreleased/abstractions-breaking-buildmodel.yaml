@@ -1,0 +1,3 @@
+project: abstractions
+kind: Changed
+body: "**Breaking:** `ICclParser` gains a required `BuildModel` member. Existing implementations must add it (a `throw new NotImplementedException()` is acceptable for impls not yet supporting the canonical model)."

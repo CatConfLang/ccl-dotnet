@@ -41,6 +41,7 @@ public static class TestExecutor
       case "parse": AssertParse(impl, test); break;
       case "parse_indented": AssertParseIndented(impl, test); break;
       case "build_hierarchy": AssertBuildHierarchy(impl, test); break;
+      case "build_model": AssertBuildModel(impl, test); break;
       case "load": AssertLoad(impl, test); break;
       case "print": AssertPrint(impl, test); break;
       case "canonical_format": AssertCanonicalFormat(impl, test); break;
@@ -124,6 +125,25 @@ public static class TestExecutor
 
     var result = impl.Parser.BuildHierarchy(input);
     AssertNotNull(result, "BuildHierarchy result");
+
+    if (test.Expected.Object is JsonElement expectedObj)
+    {
+      AssertObjectMatches(expectedObj, result);
+    }
+  }
+
+  private static void AssertBuildModel(ICclImplementation impl, CclTestCase test)
+  {
+    var input = test.Inputs[0];
+
+    if (test.Expected.Error || test.ExpectError)
+    {
+      AssertThrowsAny(() => impl.Parser.BuildModel(input), "BuildModel should throw");
+      return;
+    }
+
+    var result = impl.Parser.BuildModel(input);
+    AssertNotNull(result, "BuildModel result");
 
     if (test.Expected.Object is JsonElement expectedObj)
     {
