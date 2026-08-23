@@ -419,7 +419,8 @@ type CclPacmanImplementation(?configPath: string) =
             | null -> "0.0.0"
             | version -> version.ToString()
 
-        member _.ConfigPath = defaultArg configPath "ccl-pacman-config.yaml"
+        member _.ConfigPath =
+            defaultArg configPath (System.IO.Path.Combine(System.AppContext.BaseDirectory, "ccl-config.yaml"))
 
         member _.Parser = parser
 

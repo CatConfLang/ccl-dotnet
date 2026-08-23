@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\src\CclDotnet.Pacman\ccl-pacman-config.yaml" Link="ccl-pacman-config.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\src\CclDotnet.Pacman\ccl-config.yaml" Link="ccl-config.yaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
