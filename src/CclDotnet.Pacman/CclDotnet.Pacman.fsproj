@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsPackable>true</IsPackable>
+    <AssemblyName>CclPacman</AssemblyName>
     <PackageId>CatConfLang.CclDotnet.Pacman</PackageId>
     <Description>F# Pacman parser core for CatConfLang CCL.</Description>
   </PropertyGroup>
@@ -13,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="ccl-pacman-config.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="ccl-config.yaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
